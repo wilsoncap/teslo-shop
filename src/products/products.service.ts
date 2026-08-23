@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +12,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger('ProductsService');
   constructor(
     // los repositorios ya los trae nest por defecto
     @InjectRepository(Product)
@@ -18,9 +24,8 @@ export class ProductsService {
       const product = this.productRepository.create(createProductDto);
       await this.productRepository.save(product);
       return product;
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException('ayuda');
+    } catch (error: unknown) {
+      this.habldeDBException(error);
     }
   }
 
@@ -38,5 +43,18 @@ export class ProductsService {
 
   remove(id: number) {
     return `This action removes a #${id} product`;
+  }
+
+  private habldeDBException(error: unknown) {
+    const dbError = error as { code?: string; detail?: string };
+
+    if (dbError.code === '23505') {
+      throw new BadRequestException(dbError.detail);
+    }
+
+    this.logger.error(error);
+    throw new InternalServerErrorException(
+      'Unexpected error, check server log',
+    );
   }
 }
