@@ -109,10 +109,32 @@ export class ProductsService {
       throw new NotFoundException(`Product with id ${id} not found`);
 
     const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      await this.productRepository.save(product);
+      if (images) {
+        await queryRunner.manager.delete(ProductImage, { product: { id } });
+
+        product.images = images.map((image) =>
+          this.productImageRepository.create({ url: image }),
+        );
+
+        await queryRunner.manager.save(product);
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
+      } else {
+        product.images = await this.productImageRepository.findBy({
+          product: { id },
+        });
+      }
+
+      //return this.findOnePlain(id); consulta que carga la relacion con las imagenes
+      //await this.productRepository.save(product);
       return product;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
       this.habldeDBException(error);
     }
   }
