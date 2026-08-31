@@ -10,7 +10,9 @@ export class User {
   @IsEmail()
   email: string;
 
-  @Column('text')
+  @Column('text', {
+    select: false,
+  })
   @IsString()
   @MinLength(6) // Buena práctica para contraseñas
   password: string;
