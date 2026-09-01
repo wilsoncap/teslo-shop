@@ -1,5 +1,5 @@
 import { IsArray, IsBoolean, IsEmail, IsString, MinLength } from "class-validator";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 export class User {
@@ -29,4 +29,14 @@ export class User {
   @IsArray()
   @IsString({ each: true }) // Valida que cada elemento del arreglo sea un string
   roles: string[];
+
+  @BeforeInsert()
+  checkFieldsBeforeInsert() {
+    this.email.toLocaleLowerCase().trim();
+  }
+
+  @BeforeUpdate()
+  checkFieldsBeforeUpdate() {
+    this.checkFieldsBeforeInsert();
+  }
 }
