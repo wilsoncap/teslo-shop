@@ -2,7 +2,10 @@ import { createParamDecorator, ExecutionContext, InternalServerErrorException } 
 
 
 export const GetUSer = createParamDecorator(
-    (data, ctx: ExecutionContext) => {
+    (data: string | undefined, ctx: ExecutionContext) => {
+
+        console.log(data);
+        
         
         const req = ctx.switchToHttp().getRequest();
         
@@ -13,6 +16,6 @@ export const GetUSer = createParamDecorator(
             throw new InternalServerErrorException('User not found (request)');
         }
         
-        return user;
+        return data ? user[data] : user;
     }
 )
