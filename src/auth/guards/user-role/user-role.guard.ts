@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Internal
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { User } from '../../entities/user.entity';
-import { use } from 'passport';
+import { META_ROLES } from '../../decorators/role-protected.decorator';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
@@ -15,7 +15,7 @@ export class UserRoleGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
 
-    const validateRoles: string[] = this.reflector.get('roles', context.getHandler())
+    const validateRoles: string[] = this.reflector.get(META_ROLES, context.getHandler())
 
     if (!validateRoles) return true
     if (validateRoles.length === 0) return true
