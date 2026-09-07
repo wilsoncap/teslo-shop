@@ -1,5 +1,6 @@
 import { IsArray, IsBoolean, IsEmail, IsString, MinLength } from "class-validator";
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from "../../products/entities";
 
 @Entity('users')
 export class User {
@@ -29,6 +30,12 @@ export class User {
   @IsArray()
   @IsString({ each: true }) // Valida que cada elemento del arreglo sea un string
   roles: string[];
+
+  @OneToMany(
+    () => Product,
+    (product) => product.user
+  )
+  product: Product
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
